@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Whois Batch Lookup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .results-table th, .results-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .results-table th {
+            background-color: #007bff;
+            color: white;
+        }
+        .results-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .results-table tr:hover {
+            background-color: #ddd;
+        }
+        .domain-name {
+            color: red;
+            font-weight: bold;
+        }
+        .status-note {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Whois Batch Lookup</h1>
+        <form method="post">
+            <div>
+                <label for="domains">Enter domain names (one per line):</label>
+                <textarea name="domains" id="domains" rows="10"></textarea>
+            </div>
+            <div>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+        {% if whois_results %}
+            <div>
+                <h2>Whois Batch Lookup Results</h2>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>域名</th>
+                            <th>註冊商</th>
+                            <th>更新時間</th>
+                            <th>創建時間</th>
+                            <th>過期時間</th>
+                            <th>域名狀態</th>
+                            <th>NS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for domain, info in whois_results.items() %}
+                            <tr>
+                                <td class="domain-name">{{ domain }}</td>
+                                <td>{{ info["Registrar Info"].get("Name", "--") }}</td>
+                                <td>{{ info["Important Dates"].get("Updated On", "--") }}</td>
+                                <td>{{ info["Important Dates"].get("Registered On", "--") }}</td>
+                                <td>{{ info["Important Dates"].get("Expires On", "--") }}</td>
+                                <td>
+                                    {% if info["Status Notes"] %}
+                                        <div class="status-note">
+                                            {% for note in info["Status Notes"] %}
+                                                {{ note }}<br>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    {{ info["Registrar Info"].get("Status", "--") }}
+                                </td>
+                                <td>{% for ns in info["Name Servers"] %}{{ ns }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
